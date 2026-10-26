@@ -1,5 +1,5 @@
 import { test, expect } from "bun:test";
-import { naturalCompare, sortLines, unique, reverse, shuffle } from "../src/lines.js";
+import { naturalCompare, sortLines, unique, reverse, shuffle, splitLines, joinLines } from "../src/lines.js";
 
 test("naturalCompare orders numbers within strings", () => {
   const arr = ["file10", "file2", "file1"];
@@ -37,4 +37,18 @@ test("shuffle is a permutation and deterministic with seeded rng", () => {
   expect(out.length).toBe(input.length);
   // does not mutate input
   expect(input).toEqual(["a", "b", "c", "d", "e"]);
+});
+
+test("splitLines/joinLines keep the final line break out of the sort", () => {
+  const { lines, trailingNewline } = splitLines("b\na\n");
+  expect(joinLines(sortLines(lines), "\n", trailingNewline)).toBe("a\nb\n");
+});
+
+test("splitLines/joinLines handle CRLF, no final break and empty text", () => {
+  const crlf = splitLines("b\r\na\r\n");
+  expect(joinLines(sortLines(crlf.lines), "\r\n", crlf.trailingNewline)).toBe("a\r\nb\r\n");
+  const bare = splitLines("b\na");
+  expect(joinLines(sortLines(bare.lines), "\n", bare.trailingNewline)).toBe("a\nb");
+  const empty = splitLines("");
+  expect(joinLines(empty.lines, "\n", empty.trailingNewline)).toBe("");
 });

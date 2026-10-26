@@ -50,4 +50,16 @@ function shuffle(lines, rng = Math.random) {
   return out;
 }
 
-module.exports = { naturalCompare, sortLines, unique, reverse, shuffle };
+/** Split text into lines, setting a final line break aside so it is not sorted into the middle. */
+function splitLines(text) {
+  const lines = text.split(/\r?\n/);
+  const trailingNewline = lines.length > 1 && lines[lines.length - 1] === "";
+  if (trailingNewline) lines.pop();
+  return { lines, trailingNewline };
+}
+
+function joinLines(lines, eol = "\n", trailingNewline = false) {
+  return lines.join(eol) + (trailingNewline ? eol : "");
+}
+
+module.exports = { naturalCompare, sortLines, unique, reverse, shuffle, splitLines, joinLines };
