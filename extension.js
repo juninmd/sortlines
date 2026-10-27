@@ -1,5 +1,6 @@
 const vscode = require("vscode");
-const { sortLines, unique, reverse, shuffle } = require("./src/lines");
+const { sortLines, unique, reverse, shuffle, splitLines, joinLines } = require("./src/lines");
+const { selectionToLineRange } = require("./src/range");
 
 /** Run a transform over the selected lines (or the whole doc if no selection). */
 function transformLines(fn) {
@@ -10,11 +11,13 @@ function transformLines(fn) {
   if (range.isEmpty) {
     range = new vscode.Range(0, 0, doc.lineCount - 1, doc.lineAt(doc.lineCount - 1).text.length);
   } else {
-    // expand to full lines
-    range = new vscode.Range(range.start.line, 0, range.end.line, doc.lineAt(range.end.line).text.length);
+    // expand to full lines (a selection ending at column 0 does not include that line)
+    const { startLine, endLine } = selectionToLineRange(range.start, range.end);
+    range = new vscode.Range(startLine, 0, endLine, doc.lineAt(endLine).text.length);
   }
-  const lines = doc.getText(range).split(/\r?\n/);
-  const result = fn(lines).join("\n");
+  const { lines, trailingNewline } = splitLines(doc.getText(range));
+  const eol = doc.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
+  const result = joinLines(fn(lines), eol, trailingNewline);
   editor.edit((b) => b.replace(range, result));
 }
 
