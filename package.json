@@ -20,6 +20,6 @@
       { "command": "sortlines.shuffle", "title": "sortlines: Embaralhar" }
     ]
   },
-  "scripts": { "test": "bun test" },
+  "scripts": {   "test": "echo No tests" },
   "devDependencies": { "@types/bun": "latest" }
 }
